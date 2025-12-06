@@ -21,8 +21,8 @@ export function createPlayerBit(world, x, y) {
   bit.addTrait('Collider', new Collider('Circle', { radius: 16 }));
   bit.addTrait('TagSet', new TagSet(['creature', 'player']));
   bit.addTrait('InputReceiver', new InputReceiver(true, true, true));
-  bit.addTrait('MovementTarget', new MovementTarget());
-  bit.addTrait('AttackTarget', new AttackTarget());
+  bit.addTrait('MovementTarget', new MovementTarget(null, null, 0.5)); // 速度0.5
+  bit.addTrait('AttackTarget', new AttackTarget(50, 1000, 20)); // 攻撃範囲50、クールダウン1秒、攻撃力20
   bit.addTrait('SkillTargeting', new SkillTargeting());
 
   return bit;

@@ -5,6 +5,7 @@ import { InputSystem } from './systems/InputSystem.js';
 import { MovementSystem } from './systems/MovementSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js';
+import { EnemyAISystem } from './systems/EnemyAISystem.js';
 
 // Actions
 import { MoveAction } from './actions/MoveAction.js';
@@ -31,6 +32,7 @@ class Game {
     this.movementSystem = new MovementSystem(this.world);
     this.combatSystem = new CombatSystem(this.world);
     this.projectileSystem = new ProjectileSystem(this.world);
+    this.enemyAISystem = new EnemyAISystem(this.world);
 
     this.lastTime = 0;
     this.running = false;
@@ -120,6 +122,9 @@ class Game {
   update(deltaTime) {
     // 入力更新
     this.inputSystem.update();
+
+    // 敵AI更新
+    this.enemyAISystem.update();
 
     // 移動システム更新
     this.movementSystem.update();

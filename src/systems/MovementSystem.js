@@ -26,8 +26,8 @@ export class MovementSystem {
       const dy = target.y - pos.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // 移動速度
-      const speed = 2;
+      // 移動速度(MovementTargetに統合)
+      const speed = target.speed;
 
       // 目標地点に十分近い場合は到着とみなす
       if (distance < speed) {

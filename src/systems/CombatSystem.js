@@ -54,22 +54,25 @@ export class CombatSystem {
 
       // 攻撃範囲内かチェック
       if (distance <= attackTarget.attackRange) {
-        // 攻撃範囲内 → 攻撃
-        const action = new Action(
-          `attack_${Date.now()}_${bit.id}`,
-          'Attack',
-          bit.id,
-          [targetBit.id],
-          {
-            damage: 15
-          }
-        );
-        this.world.enqueueAction(action);
+        // 攻撃範囲内 → 攻撃クールダウンをチェック(AttackTargetに統合)
+        if (attackTarget.canAttack()) {
+          // 攻撃実行
+          const action = new Action(
+            `attack_${Date.now()}_${bit.id}`,
+            'Attack',
+            bit.id,
+            [targetBit.id],
+            {
+              damage: attackTarget.attackDamage
+            }
+          );
+          this.world.enqueueAction(action);
 
-        // 攻撃後はターゲットをクリア(一回だけ攻撃)
-        attackTarget.clear();
+          // クールダウンを記録
+          attackTarget.onAttack();
+        }
 
-        // 移動を停止
+        // 移動を停止(攻撃範囲内にいるので移動不要)
         const movementTarget = bit.getTrait('MovementTarget');
         if (movementTarget) {
           movementTarget.clear();

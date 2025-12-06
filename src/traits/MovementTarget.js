@@ -1,10 +1,11 @@
 /**
- * MovementTarget - 移動目標地点
+ * MovementTarget - 移動目標地点と速度
  */
 export class MovementTarget {
-  constructor(x = null, y = null) {
+  constructor(x = null, y = null, speed = 0.5) {
     this.x = x;
     this.y = y;
+    this.speed = speed;
   }
 
   /**

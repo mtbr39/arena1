@@ -141,6 +141,12 @@ export class InputSystem {
       if (movementTarget) {
         movementTarget.setTarget(worldPos.x, worldPos.y);
       }
+
+      // 移動コマンドを出したので攻撃対象をクリア
+      const attackTarget = player.getTrait('AttackTarget');
+      if (attackTarget) {
+        attackTarget.clear();
+      }
     }
   }
 
@@ -208,6 +214,12 @@ export class InputSystem {
       const movementTarget = player.getTrait('MovementTarget');
       if (movementTarget) {
         movementTarget.clear();
+      }
+
+      // キーボード移動中は攻撃対象もキャンセル
+      const attackTarget = player.getTrait('AttackTarget');
+      if (attackTarget) {
+        attackTarget.clear();
       }
 
       const action = new Action(
