@@ -9,16 +9,35 @@ export class RenderSystem {
   }
 
   /**
+   * DPR考慮した論理的な幅を取得
+   */
+  get logicalWidth() {
+    const dpr = this.canvas.dpr || 1;
+    return this.canvas.width / dpr;
+  }
+
+  /**
+   * DPR考慮した論理的な高さを取得
+   */
+  get logicalHeight() {
+    const dpr = this.canvas.dpr || 1;
+    return this.canvas.height / dpr;
+  }
+
+  /**
    * 全Bitを描画
    */
   render(world) {
     const ctx = this.ctx;
-    const width = this.canvas.width;
-    const height = this.canvas.height;
+    const dpr = this.canvas.dpr || 1;
 
-    // クリア
+    // DPR考慮してクリア(物理ピクセル)
     ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 描画スケールを適用
+    ctx.save();
+    ctx.scale(dpr, dpr);
 
     // レイヤーとzIndexでソート
     const bits = world.getAllBits().sort((a, b) => {
@@ -56,6 +75,9 @@ export class RenderSystem {
     for (const bit of bits) {
       this.renderHealthBar(bit);
     }
+
+    // スケールを元に戻す
+    ctx.restore();
   }
 
   /**

@@ -144,8 +144,8 @@ class Game {
     this.world.addBit(button2);
 
     // スキルボタンを画面下部に配置
-    const skillButtonY = this.canvas.height - 80;
-    const skillButtonStartX = this.canvas.width / 2 - 100;
+    const skillButtonY = this.renderSystem.logicalHeight - 80;
+    const skillButtonStartX = this.renderSystem.logicalWidth / 2 - 100;
 
     const skillQ = createSkillButtonBit(this.world, skillButtonStartX, skillButtonY, 'Q', 'Fire');
     this.world.addBit(skillQ);
@@ -197,8 +197,8 @@ class Game {
       const pos = player.getTrait('Position');
       if (pos) {
         // カメラを中央に配置
-        const centerX = pos.x - this.canvas.width / 2;
-        const centerY = pos.y - this.canvas.height / 2;
+        const centerX = pos.x - this.renderSystem.logicalWidth / 2;
+        const centerY = pos.y - this.renderSystem.logicalHeight / 2;
         this.renderSystem.setCamera(centerX, centerY);
       }
     }

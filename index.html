@@ -40,8 +40,16 @@
     // Canvas をウィンドウサイズに合わせる
     const canvas = document.getElementById('gameCanvas');
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+
+      // CSS上のサイズは従来通り
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+
+      // DPRをcanvasに保存(描画時に使用)
+      canvas.dpr = dpr;
     }
 
     resizeCanvas();
