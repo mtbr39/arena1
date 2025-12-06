@@ -37,6 +37,11 @@ export class RenderSystem {
       return zIndexA - zIndexB;
     });
 
+    // 攻撃範囲を先に描画(最背面)
+    for (const bit of bits) {
+      this.renderAttackRange(bit);
+    }
+
     // AttackLineを先に描画(Bitの下に表示)
     for (const bit of bits) {
       this.renderAttackLine(bit, world);
@@ -170,6 +175,44 @@ export class RenderSystem {
     const hpRatio = health.current / health.max;
     ctx.fillStyle = '#00ff00';
     ctx.fillRect(screenX - barWidth / 2, barY, barWidth * hpRatio, barHeight);
+    ctx.restore();
+  }
+
+  /**
+   * 攻撃範囲を描画(固定砲台)
+   */
+  renderAttackRange(bit) {
+    // stationaryタグを持つBitのみ攻撃範囲を表示
+    if (!bit.hasTag('stationary')) return;
+
+    const pos = bit.getTrait('Position');
+    if (!pos) return;
+
+    const attackTarget = bit.getTrait('AttackTarget');
+    if (!attackTarget) return;
+
+    const ctx = this.ctx;
+
+    // カメラオフセット適用(layer 0のみ)
+    const offsetX = pos.layer === 0 ? -this.camera.x : 0;
+    const offsetY = pos.layer === 0 ? -this.camera.y : 0;
+
+    const screenX = pos.x + offsetX;
+    const screenY = pos.y + offsetY;
+
+    // 攻撃範囲を円で描画(陣営によって色を変える)
+    const isEnemy = bit.hasTag('enemy');
+    const strokeColor = isEnemy ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 255, 0, 0.3)';
+    const fillColor = isEnemy ? 'rgba(255, 0, 0, 0.05)' : 'rgba(0, 255, 0, 0.05)';
+
+    ctx.save();
+    ctx.strokeStyle = strokeColor;
+    ctx.fillStyle = fillColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, attackTarget.attackRange, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
     ctx.restore();
   }
 

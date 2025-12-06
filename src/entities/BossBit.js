@@ -17,16 +17,16 @@ export function createBossEnemyBit(world, x, y) {
   bit.addTrait('Health', new Health(300)); // 高いHP
   bit.addTrait('Sprite', new Sprite('#ff0000', 64, 64, 'rect')); // 大きいサイズ
   bit.addTrait('Collider', new Collider('Circle', { radius: 32 }));
-  bit.addTrait('TagSet', new TagSet(['creature', 'enemy', 'boss', 'stationary']));
+  bit.addTrait('TagSet', new TagSet(['creature', 'enemy', 'stationary']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   // MovementTargetは追加しない(動けないように)
-  bit.addTrait('AttackTarget', new AttackTarget(400, 1000, 25)); // 攻撃範囲150、クールダウン1秒、攻撃力25
+  bit.addTrait('AttackTarget', new AttackTarget(400, 500, 25)); // 攻撃範囲400、クールダウン0.5秒、攻撃力25
 
   return bit;
 }
 
 /**
- * Tower Ally Bit - 動けない強力な味方(タワー)
+ * Tower Ally Bit - 動けない強力な味方
  */
 export function createTowerAllyBit(world, x, y) {
   const bit = new Bit(world.generateBitId(), 'Tower', 'A powerful stationary tower');
@@ -35,10 +35,10 @@ export function createTowerAllyBit(world, x, y) {
   bit.addTrait('Health', new Health(250)); // 高いHP
   bit.addTrait('Sprite', new Sprite('#00ff00', 60, 60, 'rect')); // 大きいサイズ
   bit.addTrait('Collider', new Collider('Circle', { radius: 30 }));
-  bit.addTrait('TagSet', new TagSet(['creature', 'ally', 'tower', 'stationary']));
+  bit.addTrait('TagSet', new TagSet(['creature', 'ally', 'stationary']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   // MovementTargetは追加しない(動けないように)
-  bit.addTrait('AttackTarget', new AttackTarget(400, 800, 20)); // 攻撃範囲180、クールダウン0.8秒、攻撃力20
+  bit.addTrait('AttackTarget', new AttackTarget(400, 500, 20)); // 攻撃範囲400、クールダウン0.5秒、攻撃力20
 
   return bit;
 }

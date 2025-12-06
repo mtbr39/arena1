@@ -16,7 +16,7 @@ export function createPlayerBit(world, x, y) {
   const bit = new Bit(world.generateBitId(), 'Player', 'The player character');
 
   bit.addTrait('Position', new Position(x, y, 0, 0));
-  bit.addTrait('Health', new Health(100));
+  bit.addTrait('Health', new Health(800));
   bit.addTrait('Sprite', new Sprite('#4a9eff', 32, 32, 'rect'));
   bit.addTrait('Collider', new Collider('Circle', { radius: 16 }));
   bit.addTrait('TagSet', new TagSet(['creature', 'player']));

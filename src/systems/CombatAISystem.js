@@ -99,7 +99,7 @@ export class CombatAISystem {
     // 最も近いターゲットを見つける
     let nearestTarget = null;
     let nearestDistance = Infinity;
-    const searchRange = 300; // 探索範囲
+    const searchRange = 4000; // 探索範囲
 
     for (const target of potentialTargets) {
       const targetPos = target.getTrait('Position');

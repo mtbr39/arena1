@@ -15,13 +15,13 @@ export function createEnemyBit(world, x, y) {
   const bit = new Bit(world.generateBitId(), 'Enemy', 'An enemy creature');
 
   bit.addTrait('Position', new Position(x, y, 0, 0));
-  bit.addTrait('Health', new Health(50));
+  bit.addTrait('Health', new Health(60));
   bit.addTrait('Sprite', new Sprite('#ff4444', 28, 28, 'rect'));
   bit.addTrait('Collider', new Collider('Circle', { radius: 14 }));
   bit.addTrait('TagSet', new TagSet(['creature', 'enemy']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   bit.addTrait('MovementTarget', new MovementTarget(null, null, 0.3)); // 速度0.3で遅く
-  bit.addTrait('AttackTarget', new AttackTarget(50, 2000, 2.5)); // 攻撃範囲50、クールダウン2秒、攻撃力2.5
+  bit.addTrait('AttackTarget', new AttackTarget(50, 2000, 4)); // 攻撃範囲50、クールダウン2秒、攻撃力2.5
 
   return bit;
 }
@@ -39,7 +39,7 @@ export function createEnemyRangedBit(world, x, y) {
   bit.addTrait('TagSet', new TagSet(['creature', 'enemy', 'ranged']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   bit.addTrait('MovementTarget', new MovementTarget(null, null, 0.25)); // やや遅い
-  bit.addTrait('AttackTarget', new AttackTarget(200, 2500, 2)); // 攻撃範囲200、クールダウン2.5秒、攻撃力2
+  bit.addTrait('AttackTarget', new AttackTarget(200, 2500, 3)); // 攻撃範囲200、クールダウン2.5秒、攻撃力2
 
   return bit;
 }

@@ -45,8 +45,8 @@ class Game {
       allySpawnCount: 2, // 一度に2匹の味方をスポーン
       enemyFactories: [createEnemyBit, createEnemyRangedBit],
       allyFactories: [createAllyMeleeBit, createAllyRangedBit],
-      enemySpawnArea: { minX: 100, maxX: 700, minY: 50, maxY: 250 },
-      allySpawnArea: { minX: 200, maxX: 600, minY: 350, maxY: 550 }
+      enemySpawnArea: { minX: 100, maxX: 700, minY: -400, maxY: -200 },
+      allySpawnArea: { minX: 200, maxX: 600, minY: 800, maxY: 1000 }
     });
 
     this.lastTime = 0;
@@ -70,11 +70,11 @@ class Game {
     this.world.addBit(player);
 
     // ボス敵を配置(画面上部中央、動かない)
-    const boss = createBossEnemyBit(this.world, 400, 100);
+    const boss = createBossEnemyBit(this.world, 400, -100);
     this.world.addBit(boss);
 
     // タワー味方を配置(画面下部中央、動かない)
-    const tower = createTowerAllyBit(this.world, 400, 500);
+    const tower = createTowerAllyBit(this.world, 400, 700);
     this.world.addBit(tower);
 
     // 敵を複数配置(近距離と遠距離)

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bit World Game - UI攻撃可能ゲーム</title>
+  <title>Bit World Game</title>
   <style>
     * {
       margin: 0;
@@ -11,100 +11,23 @@
       box-sizing: border-box;
     }
 
-    body {
-      background: #0f0f1e;
-      color: #ffffff;
-      font-family: 'Arial', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-      font-size: 2em;
-      text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
-    }
-
-    .info {
-      max-width: 800px;
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(50, 50, 70, 0.5);
-      border-radius: 8px;
-      font-size: 0.9em;
-    }
-
-    .info h2 {
-      margin-bottom: 10px;
-      color: #4a9eff;
-    }
-
-    .info ul {
-      list-style-position: inside;
-      line-height: 1.6;
-    }
-
-    .info strong {
-      color: #ff4a6e;
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
 
     #gameCanvas {
-      border: 3px solid #4a9eff;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(74, 158, 255, 0.3);
+      display: block;
+      width: 100%;
+      height: 100%;
       cursor: crosshair;
       background: #1a1a2e;
-    }
-
-    .controls {
-      margin-top: 20px;
-      padding: 15px;
-      background: rgba(50, 50, 70, 0.5);
-      border-radius: 8px;
-      max-width: 800px;
-    }
-
-    .controls h3 {
-      margin-bottom: 10px;
-      color: #4a9eff;
-    }
-
-    .controls ul {
-      list-style-position: inside;
-      line-height: 1.8;
-    }
-
-    .highlight {
-      color: #00ff88;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="info">
-    <h2>コンセプト</h2>
-    <p>
-      この世界では<strong>すべてがBit</strong>です。プレイヤー、敵、UI、すべて同じ仕組みで動きます。
-      <br>
-    </p>
-  </div>
-
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-  <div class="controls">
-    <h3>操作方法</h3>
-    <ul>
-      <li><span class="highlight">WASD / 矢印キー</span>: プレイヤーを移動</li>
-      <li><span class="highlight">左クリック</span>: エンティティやUIをクリック</li>
-      <li><span class="highlight">右クリック</span>: エンティティやUIを攻撃 (ダメージ15)</li>
-      <li>UIボタンを何度も攻撃すると<span class="highlight">破壊できます!</span></li>
-      <li>敵も攻撃して倒せます</li>
-    </ul>
-  </div>
+  <canvas id="gameCanvas"></canvas>
 
   <script type="module">
     import { initGame } from './src/main.js';
@@ -114,8 +37,17 @@
       e.preventDefault();
     });
 
-    // ゲーム初期化
+    // Canvas をウィンドウサイズに合わせる
     const canvas = document.getElementById('gameCanvas');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // ゲーム初期化
     const game = initGame(canvas);
 
     // グローバルに公開(デバッグ用)

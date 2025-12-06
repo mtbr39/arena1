@@ -20,15 +20,15 @@ export class SpawnSystem {
     this.enemySpawnArea = config.enemySpawnArea || {
       minX: 100,
       maxX: 700,
-      minY: 50,
-      maxY: 250
+      minY: -800,
+      maxY: -600
     };
 
     this.allySpawnArea = config.allySpawnArea || {
       minX: 200,
       maxX: 600,
-      minY: 350,
-      maxY: 550
+      minY: 500,
+      maxY: 700
     };
 
     // スポーン用のファクトリ関数を保持

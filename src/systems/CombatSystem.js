@@ -75,15 +75,16 @@ export class CombatSystem {
           // クールダウンを記録
           attackTarget.onAttack();
 
-          // 攻撃線を追加(AIの場合のみ - playerタグを持たない場合)
-          if (!bit.hasTag('player')) {
-            // 既存の攻撃線があれば削除
-            if (bit.hasTrait('AttackLine')) {
-              bit.removeTrait('AttackLine');
-            }
-            // 新しい攻撃線を追加
-            bit.addTrait('AttackLine', new AttackLine(targetBit.id, 500, '#ffff00'));
+          // 攻撃線を追加(全てのBitで表示)
+          // 既存の攻撃線があれば削除
+          if (bit.hasTrait('AttackLine')) {
+            bit.removeTrait('AttackLine');
           }
+          // 攻撃者のSprite色を取得(なければデフォルト色)
+          const sprite = bit.getTrait('Sprite');
+          const lineColor = sprite ? sprite.color : '#ffff00';
+          // 新しい攻撃線を追加
+          bit.addTrait('AttackLine', new AttackLine(targetBit.id, 500, lineColor));
         }
 
         // 移動を停止(攻撃範囲内にいるので移動不要)
@@ -92,15 +93,21 @@ export class CombatSystem {
           movementTarget.clear();
         }
       } else {
-        // 攻撃範囲外 → ターゲットに向かって移動
-        const movementTarget = bit.getTrait('MovementTarget');
-        if (movementTarget) {
-          // 攻撃範囲ぎりぎりまで近づく
-          const stopDistance = attackTarget.attackRange - 5;
-          const ratio = stopDistance / distance;
-          const targetX = pos.x + dx * ratio;
-          const targetY = pos.y + dy * ratio;
-          movementTarget.setTarget(targetX, targetY);
+        // 攻撃範囲外
+        // stationaryタグを持つBitは移動できないので、ターゲットをクリア
+        if (bit.hasTag('stationary')) {
+          attackTarget.clear();
+        } else {
+          // 移動可能なBitはターゲットに向かって移動
+          const movementTarget = bit.getTrait('MovementTarget');
+          if (movementTarget) {
+            // 攻撃範囲ぎりぎりまで近づく
+            const stopDistance = attackTarget.attackRange - 5;
+            const ratio = stopDistance / distance;
+            const targetX = pos.x + dx * ratio;
+            const targetY = pos.y + dy * ratio;
+            movementTarget.setTarget(targetX, targetY);
+          }
         }
       }
     }
