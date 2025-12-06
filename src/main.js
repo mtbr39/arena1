@@ -2,6 +2,7 @@ import { World } from './core/World.js';
 import { ActionResolver } from './core/ActionResolver.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { InputSystem } from './systems/InputSystem.js';
+import { MovementSystem } from './systems/MovementSystem.js';
 
 // Actions
 import { MoveAction } from './actions/MoveAction.js';
@@ -24,6 +25,7 @@ class Game {
     this.resolver = new ActionResolver(this.world);
     this.renderSystem = new RenderSystem(canvas);
     this.inputSystem = new InputSystem(canvas, this.world, this.renderSystem);
+    this.movementSystem = new MovementSystem(this.world);
 
     this.lastTime = 0;
     this.running = false;
@@ -112,6 +114,9 @@ class Game {
   update(deltaTime) {
     // 入力更新
     this.inputSystem.update();
+
+    // 移動システム更新
+    this.movementSystem.update();
 
     // Actionを処理
     this.world.processActions(this.resolver);

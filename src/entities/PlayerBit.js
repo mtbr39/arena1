@@ -5,6 +5,7 @@ import { Sprite } from '../traits/Sprite.js';
 import { Collider } from '../traits/Collider.js';
 import { TagSet } from '../traits/TagSet.js';
 import { InputReceiver } from '../traits/InputReceiver.js';
+import { MovementTarget } from '../traits/MovementTarget.js';
 
 /**
  * Player Bit - プレイヤーキャラクター
@@ -18,6 +19,7 @@ export function createPlayerBit(world, x, y) {
   bit.addTrait('Collider', new Collider('Circle', { radius: 16 }));
   bit.addTrait('TagSet', new TagSet(['creature', 'player']));
   bit.addTrait('InputReceiver', new InputReceiver(true, true, true));
+  bit.addTrait('MovementTarget', new MovementTarget());
 
   return bit;
 }
