@@ -3,6 +3,8 @@ import { ActionResolver } from './core/ActionResolver.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { InputSystem } from './systems/InputSystem.js';
 import { MovementSystem } from './systems/MovementSystem.js';
+import { CombatSystem } from './systems/CombatSystem.js';
+import { ProjectileSystem } from './systems/ProjectileSystem.js';
 
 // Actions
 import { MoveAction } from './actions/MoveAction.js';
@@ -14,6 +16,7 @@ import { DestroyAction } from './actions/DestroyAction.js';
 import { createPlayerBit } from './entities/PlayerBit.js';
 import { createEnemyBit } from './entities/EnemyBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
+import { createSkillButtonBit } from './entities/SkillButtonBit.js';
 
 /**
  * ゲームのメインクラス
@@ -26,6 +29,8 @@ class Game {
     this.renderSystem = new RenderSystem(canvas);
     this.inputSystem = new InputSystem(canvas, this.world, this.renderSystem);
     this.movementSystem = new MovementSystem(this.world);
+    this.combatSystem = new CombatSystem(this.world);
+    this.projectileSystem = new ProjectileSystem(this.world);
 
     this.lastTime = 0;
     this.running = false;
@@ -89,23 +94,24 @@ class Game {
     );
     this.world.addBit(button2);
 
-    // 説明用のUIテキスト
-    const infoButton = createUIButtonBit(
-      this.world,
-      this.canvas.width - 150,
-      50,
-      'UI has HP!',
-      () => {
-        console.log('This UI can be destroyed by attacking it!');
-      }
-    );
-    this.world.addBit(infoButton);
+    // スキルボタンを画面下部に配置
+    const skillButtonY = this.canvas.height - 80;
+    const skillButtonStartX = this.canvas.width / 2 - 100;
+
+    const skillQ = createSkillButtonBit(this.world, skillButtonStartX, skillButtonY, 'Q', 'Fire');
+    this.world.addBit(skillQ);
+
+    const skillW = createSkillButtonBit(this.world, skillButtonStartX + 70, skillButtonY, 'W', 'Ice');
+    this.world.addBit(skillW);
+
+    const skillE = createSkillButtonBit(this.world, skillButtonStartX + 140, skillButtonY, 'E', 'Wind');
+    this.world.addBit(skillE);
 
     console.log('Game initialized!');
     console.log('Controls:');
-    console.log('- WASD or Arrow keys: Move player');
-    console.log('- Left click: Click on entities/UI');
-    console.log('- Right click: Attack entities/UI (UIも攻撃できる!)');
+    console.log('- Click empty area: Move to that position');
+    console.log('- Click enemy: Move close and attack');
+    console.log('- Q/W/E keys or skill buttons: Activate skill, then click to aim');
   }
 
   /**
@@ -117,6 +123,12 @@ class Game {
 
     // 移動システム更新
     this.movementSystem.update();
+
+    // 戦闘システム更新
+    this.combatSystem.update();
+
+    // 弾システム更新
+    this.projectileSystem.update();
 
     // Actionを処理
     this.world.processActions(this.resolver);

@@ -1,4 +1,12 @@
 import { Action } from '../core/Action.js';
+import { createProjectileBit } from '../entities/ProjectileBit.js';
+
+// スキルごとの設定
+const SKILL_CONFIG = {
+  Q: { color: '#ff6600', size: 14, speed: 8, damage: 25, range: 400, name: 'Fire' },
+  W: { color: '#66ccff', size: 16, speed: 6, damage: 30, range: 350, name: 'Ice' },
+  E: { color: '#99ff66', size: 10, speed: 12, damage: 15, range: 500, name: 'Wind' }
+};
 
 /**
  * InputSystem - マウス・キーボード入力を管理
@@ -78,6 +86,16 @@ export class InputSystem {
     const player = this.world.queryBits(bit => bit.hasTag('player'))[0];
     if (!player) return;
 
+    // スキルターゲティング中かチェック
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (skillTargeting && skillTargeting.isTargeting) {
+      // スキルの方向指定
+      const worldPos = this.renderSystem.screenToWorld(clickX, clickY, 0);
+      this.castSkill(player, skillTargeting.skillSlot, worldPos);
+      skillTargeting.endTargeting();
+      return;
+    }
+
     // レイヤー1(UI)を優先的にチェック
     let targets = this.world.getBitsAtPosition(clickX, clickY, 1);
     let worldPos = null;
@@ -89,25 +107,29 @@ export class InputSystem {
     }
 
     if (targets.length > 0) {
-      // ターゲットがある場合: ClickまたはAttackアクションを発行
+      // ターゲットがある場合の処理
       const target = targets[0];
 
-      // 右クリックなら攻撃、左クリックならクリック
-      const actionKind = e.button === 2 ? 'Attack' : 'Click';
-
-      const action = new Action(
-        `${actionKind.toLowerCase()}_${Date.now()}`,
-        actionKind,
-        player.id,
-        [target.id],
-        {
-          mouseX: clickX,
-          mouseY: clickY,
-          damage: 15
+      // 敵(creature タグを持つ)をクリックした場合は攻撃対象に設定
+      if (target.hasTag('creature') && !target.hasTag('player')) {
+        const attackTarget = player.getTrait('AttackTarget');
+        if (attackTarget) {
+          attackTarget.setTarget(target.id);
         }
-      );
-
-      this.world.enqueueAction(action);
+      } else {
+        // UIやその他のBitをクリック → Clickアクション
+        const action = new Action(
+          `click_${Date.now()}`,
+          'Click',
+          player.id,
+          [target.id],
+          {
+            mouseX: clickX,
+            mouseY: clickY
+          }
+        );
+        this.world.enqueueAction(action);
+      }
     } else {
       // ターゲットがない場合: その場所を目標地点として設定
       if (!worldPos) {
@@ -120,6 +142,49 @@ export class InputSystem {
         movementTarget.setTarget(worldPos.x, worldPos.y);
       }
     }
+  }
+
+  /**
+   * スキル発動
+   */
+  castSkill(player, skillSlot, targetPos) {
+    const playerPos = player.getTrait('Position');
+    if (!playerPos) return;
+
+    // 方向ベクトルを計算
+    const dx = targetPos.x - playerPos.x;
+    const dy = targetPos.y - playerPos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return;
+
+    // 正規化
+    const dirX = dx / distance;
+    const dirY = dy / distance;
+
+    // スキル設定を取得
+    const config = SKILL_CONFIG[skillSlot] || SKILL_CONFIG.Q;
+
+    // 弾を生成
+    const projectile = createProjectileBit(
+      this.world,
+      playerPos.x,
+      playerPos.y,
+      dirX,
+      dirY,
+      {
+        color: config.color,
+        size: config.size,
+        speed: config.speed,
+        damage: config.damage,
+        range: config.range,
+        skillType: skillSlot
+      }
+    );
+    projectile.ownerId = player.id;
+    this.world.addBit(projectile);
+
+    console.log(`Skill ${skillSlot} (${config.name}) fired!`);
   }
 
   /**
@@ -158,9 +223,36 @@ export class InputSystem {
   }
 
   /**
+   * スキルキー入力を処理
+   */
+  updateSkillInput() {
+    const player = this.world.queryBits(bit => bit.hasTag('player'))[0];
+    if (!player) return;
+
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (!skillTargeting) return;
+
+    // スキルキーの処理
+    if (this.keys.has('q')) {
+      this.keys.delete('q');
+      skillTargeting.startTargeting('Q');
+      console.log('Skill Q: Click to target direction');
+    } else if (this.keys.has('w')) {
+      this.keys.delete('w');
+      skillTargeting.startTargeting('W');
+      console.log('Skill W: Click to target direction');
+    } else if (this.keys.has('e')) {
+      this.keys.delete('e');
+      skillTargeting.startTargeting('E');
+      console.log('Skill E: Click to target direction');
+    }
+  }
+
+  /**
    * 更新(毎フレーム呼ぶ)
    */
   update() {
+    this.updateSkillInput();
     this.updatePlayerMovement();
   }
 }

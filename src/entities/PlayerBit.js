@@ -6,6 +6,8 @@ import { Collider } from '../traits/Collider.js';
 import { TagSet } from '../traits/TagSet.js';
 import { InputReceiver } from '../traits/InputReceiver.js';
 import { MovementTarget } from '../traits/MovementTarget.js';
+import { AttackTarget } from '../traits/AttackTarget.js';
+import { SkillTargeting } from '../traits/SkillTargeting.js';
 
 /**
  * Player Bit - プレイヤーキャラクター
@@ -20,6 +22,8 @@ export function createPlayerBit(world, x, y) {
   bit.addTrait('TagSet', new TagSet(['creature', 'player']));
   bit.addTrait('InputReceiver', new InputReceiver(true, true, true));
   bit.addTrait('MovementTarget', new MovementTarget());
+  bit.addTrait('AttackTarget', new AttackTarget());
+  bit.addTrait('SkillTargeting', new SkillTargeting());
 
   return bit;
 }

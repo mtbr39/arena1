@@ -18,6 +18,17 @@ export class World {
   }
 
   /**
+   * Bitを削除
+   */
+  removeBit(id) {
+    const bit = this.bits.get(id);
+    if (bit) {
+      bit.active = false;
+      this.bits.delete(id);
+    }
+  }
+
+  /**
    * Bitを取得
    */
   getBit(id) {
