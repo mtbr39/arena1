@@ -21,12 +21,23 @@ export class ActionResolver {
       return;
     }
 
-    // Actionハンドラを優先実行(Bit固有の処理)
+    // Actorのハンドラを実行(Bit固有の処理)
     const actorBit = world.getBit(action.actor);
     if (actorBit) {
       const handler = actorBit.getActionHandler(action.kind);
       if (handler) {
         handler(world, action);
+      }
+    }
+
+    // Targetのハンドラを実行(クリックされたBitなど)
+    for (const targetId of action.targets) {
+      const targetBit = world.getBit(targetId);
+      if (targetBit) {
+        const handler = targetBit.getActionHandler(action.kind);
+        if (handler) {
+          handler(world, action);
+        }
       }
     }
 
