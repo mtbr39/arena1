@@ -1,8 +1,14 @@
+import { System } from '../core/System.js';
+
 /**
  * RenderSystem - Canvasへの描画を管理
+ *
+ * 注: RenderSystem は特殊で、World への依存がないため
+ * System を継承しますが、update() は使わず render(world) を直接呼びます
  */
-export class RenderSystem {
+export class RenderSystem extends System {
   constructor(canvas) {
+    super(null, { autoRegister: false }); // 自動登録しない
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.camera = { x: 0, y: 0 };

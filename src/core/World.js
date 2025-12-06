@@ -1,3 +1,5 @@
+import { SystemManager } from './SystemManager.js';
+
 /**
  * World - Bitの集合とActionの管理
  */
@@ -7,6 +9,7 @@ export class World {
     this.actionQueue = []; // 処理待ちAction
     this.actionKinds = new Map(); // ActionKindId -> ActionKind
     this.nextBitId = 0;
+    this.systemManager = new SystemManager(); // System の自動管理
   }
 
   /**

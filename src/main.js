@@ -1,7 +1,8 @@
 import { World } from './core/World.js';
 import { ActionResolver } from './core/ActionResolver.js';
+import { InputManager } from './core/InputManager.js';
 import { RenderSystem } from './systems/RenderSystem.js';
-import { InputSystem } from './systems/InputSystem.js';
+import { PlayerInputSystem } from './systems/PlayerInputSystem.js';
 import { MovementSystem } from './systems/MovementSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js';
@@ -31,14 +32,17 @@ class Game {
     this.canvas = canvas;
     this.world = new World();
     this.resolver = new ActionResolver(this.world);
+
+    // 入力管理(汎用)
+    this.inputManager = new InputManager(canvas);
+
+    // 描画システム(特殊: updateではなくrenderを直接呼ぶ)
     this.renderSystem = new RenderSystem(canvas);
-    this.inputSystem = new InputSystem(canvas, this.world, this.renderSystem);
-    this.movementSystem = new MovementSystem(this.world);
-    this.combatSystem = new CombatSystem(this.world);
-    this.projectileSystem = new ProjectileSystem(this.world);
-    this.combatAISystem = new CombatAISystem(this.world);
-    this.repulsionSystem = new RepulsionSystem(this.world);
-    this.spawnSystem = new SpawnSystem(this.world, {
+
+    // System の登録(登録順 = 実行順)
+    // 注: コンストラクタで自動的に world.systemManager に登録される
+    new PlayerInputSystem(this.world, this.inputManager, this.renderSystem);
+    new SpawnSystem(this.world, {
       enemySpawnInterval: 8000, // 8秒ごとに敵をスポーン
       allySpawnInterval: 10000, // 10秒ごとに味方をスポーン
       enemySpawnCount: 3, // 一度に3匹の敵をスポーン
@@ -48,6 +52,11 @@ class Game {
       enemySpawnArea: { minX: 100, maxX: 700, minY: -400, maxY: -200 },
       allySpawnArea: { minX: 200, maxX: 600, minY: 800, maxY: 1000 }
     });
+    new CombatAISystem(this.world);
+    new MovementSystem(this.world);
+    new RepulsionSystem(this.world);
+    new CombatSystem(this.world);
+    new ProjectileSystem(this.world);
 
     this.lastTime = 0;
     this.running = false;
@@ -167,29 +176,14 @@ class Game {
    * 更新
    */
   update(deltaTime) {
-    // 入力更新
-    this.inputSystem.update();
-
-    // スポーンシステム更新
-    this.spawnSystem.update();
-
-    // AI更新(すべてのcreatureが自動で敵を探す)
-    this.combatAISystem.update();
-
-    // 移動システム更新
-    this.movementSystem.update();
-
-    // 斥力システム更新(ユニットが重ならないように)
-    this.repulsionSystem.update();
-
-    // 戦闘システム更新
-    this.combatSystem.update();
-
-    // 弾システム更新
-    this.projectileSystem.update();
+    // すべての System を自動で更新
+    this.world.systemManager.updateAll(deltaTime);
 
     // Actionを処理
     this.world.processActions(this.resolver);
+
+    // 入力状態をリセット(フレーム単位のイベント検知用)
+    this.inputManager.resetFrameState();
 
     // カメラをプレイヤーに追従(オプション)
     const player = this.world.queryBits(bit => bit.hasTag('player'))[0];

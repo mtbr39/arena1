@@ -1,17 +1,14 @@
+import { System } from '../core/System.js';
 import { Action } from '../core/Action.js';
 
 /**
  * ProjectileSystem - 弾の移動と衝突処理
  */
-export class ProjectileSystem {
-  constructor(world) {
-    this.world = world;
-  }
-
+export class ProjectileSystem extends System {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     const projectiles = this.world.queryBits(bit => bit.hasTag('projectile'));
 
     for (const projectile of projectiles) {

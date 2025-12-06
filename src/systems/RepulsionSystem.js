@@ -1,9 +1,11 @@
+import { System } from '../core/System.js';
+
 /**
  * RepulsionSystem - ユニット同士が重ならないように斥力を適用
  */
-export class RepulsionSystem {
+export class RepulsionSystem extends System {
   constructor(world) {
-    this.world = world;
+    super(world);
     this.repulsionRadius = 40; // 斥力が働く距離
     this.repulsionStrength = 0.5; // 斥力の強さ
   }
@@ -11,7 +13,7 @@ export class RepulsionSystem {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     // creature タグを持つすべてのBitを取得
     const creatures = this.world.queryBits(bit =>
       bit.hasTag('creature') && bit.hasTrait('Position')

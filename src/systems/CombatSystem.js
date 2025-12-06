@@ -1,18 +1,15 @@
+import { System } from '../core/System.js';
 import { Action } from '../core/Action.js';
 import { AttackLine } from '../traits/AttackLine.js';
 
 /**
  * CombatSystem - 戦闘処理(攻撃対象への接近と攻撃)
  */
-export class CombatSystem {
-  constructor(world) {
-    this.world = world;
-  }
-
+export class CombatSystem extends System {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     // 期限切れの攻撃線を削除
     this.cleanupExpiredAttackLines();
 

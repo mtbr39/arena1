@@ -1,9 +1,11 @@
+import { System } from '../core/System.js';
+
 /**
  * SpawnSystem - 一定間隔で敵と味方を自動生成
  */
-export class SpawnSystem {
+export class SpawnSystem extends System {
   constructor(world, config = {}) {
-    this.world = world;
+    super(world);
 
     // スポーン設定
     this.enemySpawnInterval = config.enemySpawnInterval || 5000; // 5秒ごと
@@ -39,7 +41,7 @@ export class SpawnSystem {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     const now = Date.now();
 
     // 敵のスポーン

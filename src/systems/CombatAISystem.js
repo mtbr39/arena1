@@ -1,10 +1,12 @@
+import { System } from '../core/System.js';
+
 /**
  * CombatAISystem - すべてのcreatureの自動ターゲット選択と行動AI
  * 敵・味方の区別なく、「自分と異なる陣営の最も近い敵」を攻撃する
  */
-export class CombatAISystem {
+export class CombatAISystem extends System {
   constructor(world) {
-    this.world = world;
+    super(world);
     this.targetSearchInterval = 500; // 0.5秒ごとにターゲット検索
     this.lastSearchTime = 0;
   }
@@ -12,7 +14,7 @@ export class CombatAISystem {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     const now = Date.now();
 
     // 一定間隔でターゲット検索を実行

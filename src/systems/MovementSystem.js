@@ -1,15 +1,13 @@
+import { System } from '../core/System.js';
+
 /**
  * MovementSystem - 目標地点への移動を処理
  */
-export class MovementSystem {
-  constructor(world) {
-    this.world = world;
-  }
-
+export class MovementSystem extends System {
   /**
    * 更新(毎フレーム呼ぶ)
    */
-  update() {
+  update(deltaTime) {
     // MovementTargetを持つすべてのBitを処理
     const movingBits = this.world.queryBits(bit =>
       bit.hasTrait('MovementTarget') && bit.hasTrait('Position')
