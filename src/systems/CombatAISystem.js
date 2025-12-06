@@ -1,7 +1,8 @@
 /**
- * EnemyAISystem - 敵の自動ターゲット選択と行動AI
+ * CombatAISystem - すべてのcreatureの自動ターゲット選択と行動AI
+ * 敵・味方の区別なく、「自分と異なる陣営の最も近い敵」を攻撃する
  */
-export class EnemyAISystem {
+export class CombatAISystem {
   constructor(world) {
     this.world = world;
     this.targetSearchInterval = 500; // 0.5秒ごとにターゲット検索
@@ -20,30 +21,33 @@ export class EnemyAISystem {
     }
     this.lastSearchTime = now;
 
-    // 敵タグを持つすべてのBitを取得
-    const enemies = this.world.queryBits(bit =>
-      bit.hasTag('enemy') && bit.hasTrait('Position') && bit.hasTrait('AttackTarget')
+    // AttackTargetを持つすべてのcreatureを取得(player以外)
+    const creatures = this.world.queryBits(bit =>
+      bit.hasTag('creature') &&
+      !bit.hasTag('player') && // プレイヤーは手動操作なので除外
+      bit.hasTrait('Position') &&
+      bit.hasTrait('AttackTarget')
     );
 
-    for (const enemy of enemies) {
-      const attackTarget = enemy.getTrait('AttackTarget');
+    for (const creature of creatures) {
+      const attackTarget = creature.getTrait('AttackTarget');
 
-      // すでにターゲットがいる場合はスキップ
+      // すでにターゲットがいる場合は有効性をチェック
       if (attackTarget.hasTarget()) {
-        // ターゲットが有効かチェック
         const currentTarget = this.world.getBit(attackTarget.targetId);
         if (currentTarget) {
           const targetHealth = currentTarget.getTrait('Health');
-          if (!targetHealth || targetHealth.current > 0) {
-            continue; // 有効なターゲットがいるので次の敵へ
+          // ターゲットが生きていれば継続
+          if (targetHealth && targetHealth.current > 0) {
+            continue;
           }
         }
         // ターゲットが無効なのでクリア
         attackTarget.clear();
       }
 
-      // 近くの敵(自分以外のcreature)を探す
-      const target = this.findNearestEnemy(enemy);
+      // 最も近い敵対勢力を探す
+      const target = this.findNearestEnemy(creature);
       if (target) {
         attackTarget.setTarget(target.id);
       }
@@ -51,14 +55,20 @@ export class EnemyAISystem {
   }
 
   /**
-   * 最も近い敵を探す
+   * 最も近い敵対勢力を探す
+   * 陣営判定:
+   * - enemy vs (player, ally)
+   * - ally vs enemy
    */
   findNearestEnemy(bit) {
     const pos = bit.getTrait('Position');
     if (!pos) return null;
 
-    // 自分にとっての敵 = 自分と異なる陣営のcreature
-    // 敵タグを持つBitはplayerタグを持つBitを狙う
+    // 自分の陣営を判定
+    const isEnemy = bit.hasTag('enemy');
+    const isAlly = bit.hasTag('ally');
+
+    // 敵対勢力を探す
     const potentialTargets = this.world.queryBits(target => {
       // 自分自身は除外
       if (target.id === bit.id) return false;
@@ -70,11 +80,14 @@ export class EnemyAISystem {
       const health = target.getTrait('Health');
       if (health && health.current <= 0) return false;
 
-      // 敵はplayerを狙う、playerはenemyを狙う
-      if (bit.hasTag('enemy') && target.hasTag('player')) {
+      // 陣営判定:
+      // enemyは player と ally を攻撃
+      if (isEnemy && (target.hasTag('player') || target.hasTag('ally'))) {
         return true;
       }
-      if (bit.hasTag('player') && target.hasTag('enemy')) {
+
+      // allyは enemy を攻撃
+      if (isAlly && target.hasTag('enemy')) {
         return true;
       }
 

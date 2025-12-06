@@ -1,4 +1,5 @@
 import { Action } from '../core/Action.js';
+import { AttackLine } from '../traits/AttackLine.js';
 
 /**
  * CombatSystem - 戦闘処理(攻撃対象への接近と攻撃)
@@ -12,6 +13,9 @@ export class CombatSystem {
    * 更新(毎フレーム呼ぶ)
    */
   update() {
+    // 期限切れの攻撃線を削除
+    this.cleanupExpiredAttackLines();
+
     // AttackTargetを持つすべてのBitを処理
     const combatants = this.world.queryBits(bit =>
       bit.hasTrait('AttackTarget') && bit.hasTrait('Position')
@@ -70,6 +74,16 @@ export class CombatSystem {
 
           // クールダウンを記録
           attackTarget.onAttack();
+
+          // 攻撃線を追加(AIの場合のみ - playerタグを持たない場合)
+          if (!bit.hasTag('player')) {
+            // 既存の攻撃線があれば削除
+            if (bit.hasTrait('AttackLine')) {
+              bit.removeTrait('AttackLine');
+            }
+            // 新しい攻撃線を追加
+            bit.addTrait('AttackLine', new AttackLine(targetBit.id, 500, '#ffff00'));
+          }
         }
 
         // 移動を停止(攻撃範囲内にいるので移動不要)
@@ -88,6 +102,22 @@ export class CombatSystem {
           const targetY = pos.y + dy * ratio;
           movementTarget.setTarget(targetX, targetY);
         }
+      }
+    }
+  }
+
+  /**
+   * 期限切れの攻撃線を削除
+   */
+  cleanupExpiredAttackLines() {
+    const bitsWithAttackLine = this.world.queryBits(bit =>
+      bit.hasTrait('AttackLine')
+    );
+
+    for (const bit of bitsWithAttackLine) {
+      const attackLine = bit.getTrait('AttackLine');
+      if (attackLine.isExpired()) {
+        bit.removeTrait('AttackLine');
       }
     }
   }

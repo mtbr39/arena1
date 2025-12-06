@@ -5,7 +5,9 @@ import { InputSystem } from './systems/InputSystem.js';
 import { MovementSystem } from './systems/MovementSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js';
-import { EnemyAISystem } from './systems/EnemyAISystem.js';
+import { CombatAISystem } from './systems/CombatAISystem.js';
+import { SpawnSystem } from './systems/SpawnSystem.js';
+import { RepulsionSystem } from './systems/RepulsionSystem.js';
 
 // Actions
 import { MoveAction } from './actions/MoveAction.js';
@@ -15,7 +17,8 @@ import { DestroyAction } from './actions/DestroyAction.js';
 
 // Entities
 import { createPlayerBit } from './entities/PlayerBit.js';
-import { createEnemyBit } from './entities/EnemyBit.js';
+import { createEnemyBit, createEnemyRangedBit } from './entities/EnemyBit.js';
+import { createAllyMeleeBit, createAllyRangedBit } from './entities/AllyBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
 import { createSkillButtonBit } from './entities/SkillButtonBit.js';
 
@@ -32,7 +35,18 @@ class Game {
     this.movementSystem = new MovementSystem(this.world);
     this.combatSystem = new CombatSystem(this.world);
     this.projectileSystem = new ProjectileSystem(this.world);
-    this.enemyAISystem = new EnemyAISystem(this.world);
+    this.combatAISystem = new CombatAISystem(this.world);
+    this.repulsionSystem = new RepulsionSystem(this.world);
+    this.spawnSystem = new SpawnSystem(this.world, {
+      enemySpawnInterval: 8000, // 8秒ごとに敵をスポーン
+      allySpawnInterval: 10000, // 10秒ごとに味方をスポーン
+      enemySpawnCount: 3, // 一度に3匹の敵をスポーン
+      allySpawnCount: 2, // 一度に2匹の味方をスポーン
+      enemyFactories: [createEnemyBit, createEnemyRangedBit],
+      allyFactories: [createAllyMeleeBit, createAllyRangedBit],
+      enemySpawnArea: { minX: 100, maxX: 700, minY: 50, maxY: 250 },
+      allySpawnArea: { minX: 200, maxX: 600, minY: 350, maxY: 550 }
+    });
 
     this.lastTime = 0;
     this.running = false;
@@ -54,12 +68,36 @@ class Game {
     const player = createPlayerBit(this.world, 400, 300);
     this.world.addBit(player);
 
-    // 敵を複数配置
-    for (let i = 0; i < 5; i++) {
+    // 敵を複数配置(近距離と遠距離)
+    for (let i = 0; i < 3; i++) {
       const x = 200 + Math.random() * 400;
       const y = 150 + Math.random() * 300;
       const enemy = createEnemyBit(this.world, x, y);
       this.world.addBit(enemy);
+    }
+
+    // 遠距離敵を配置
+    for (let i = 0; i < 2; i++) {
+      const x = 200 + Math.random() * 400;
+      const y = 150 + Math.random() * 300;
+      const rangedEnemy = createEnemyRangedBit(this.world, x, y);
+      this.world.addBit(rangedEnemy);
+    }
+
+    // 味方を配置(近距離と遠距離)
+    for (let i = 0; i < 2; i++) {
+      const x = 300 + Math.random() * 200;
+      const y = 250 + Math.random() * 200;
+      const allyMelee = createAllyMeleeBit(this.world, x, y);
+      this.world.addBit(allyMelee);
+    }
+
+    // 遠距離味方を配置
+    for (let i = 0; i < 2; i++) {
+      const x = 300 + Math.random() * 200;
+      const y = 250 + Math.random() * 200;
+      const allyRanged = createAllyRangedBit(this.world, x, y);
+      this.world.addBit(allyRanged);
     }
 
     // UIボタンを作成(攻撃可能!)
@@ -123,11 +161,17 @@ class Game {
     // 入力更新
     this.inputSystem.update();
 
-    // 敵AI更新
-    this.enemyAISystem.update();
+    // スポーンシステム更新
+    this.spawnSystem.update();
+
+    // AI更新(すべてのcreatureが自動で敵を探す)
+    this.combatAISystem.update();
 
     // 移動システム更新
     this.movementSystem.update();
+
+    // 斥力システム更新(ユニットが重ならないように)
+    this.repulsionSystem.update();
 
     // 戦闘システム更新
     this.combatSystem.update();

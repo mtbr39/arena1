@@ -34,6 +34,13 @@ export class Bit {
   }
 
   /**
+   * Traitを削除
+   */
+  removeTrait(name) {
+    return this.traits.delete(name);
+  }
+
+  /**
    * Actionハンドラを登録
    */
   setActionHandler(actionKind, handler) {

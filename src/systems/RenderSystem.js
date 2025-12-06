@@ -37,15 +37,26 @@ export class RenderSystem {
       return zIndexA - zIndexB;
     });
 
+    // AttackLineを先に描画(Bitの下に表示)
     for (const bit of bits) {
-      this.renderBit(bit);
+      this.renderAttackLine(bit, world);
+    }
+
+    // Bitを描画(HPバー以外)
+    for (const bit of bits) {
+      this.renderBit(bit, false); // HPバーは描画しない
+    }
+
+    // HPバーを最後に描画(最前面)
+    for (const bit of bits) {
+      this.renderHealthBar(bit);
     }
   }
 
   /**
    * 1つのBitを描画
    */
-  renderBit(bit) {
+  renderBit(bit, includeHealthBar = true) {
     const pos = bit.getTrait('Position');
     if (!pos) return;
 
@@ -111,8 +122,8 @@ export class RenderSystem {
       ctx.restore();
     }
 
-    // HPバー描画
-    if (health) {
+    // HPバーはincludeHealthBarがtrueの場合のみ描画
+    if (includeHealthBar && health) {
       const barWidth = sprite ? sprite.width : 40;
       const barHeight = 4;
       const barY = screenY - (sprite ? sprite.height / 2 : 20) - 10;
@@ -126,6 +137,82 @@ export class RenderSystem {
       ctx.fillRect(screenX - barWidth / 2, barY, barWidth * hpRatio, barHeight);
       ctx.restore();
     }
+  }
+
+  /**
+   * HPバーのみを描画
+   */
+  renderHealthBar(bit) {
+    const pos = bit.getTrait('Position');
+    if (!pos) return;
+
+    const health = bit.getTrait('Health');
+    if (!health) return;
+
+    const sprite = bit.getTrait('Sprite');
+    const ctx = this.ctx;
+
+    // カメラオフセット適用(layer 0のみ)
+    const offsetX = pos.layer === 0 ? -this.camera.x : 0;
+    const offsetY = pos.layer === 0 ? -this.camera.y : 0;
+
+    const screenX = pos.x + offsetX;
+    const screenY = pos.y + offsetY;
+
+    const barWidth = sprite ? sprite.width : 40;
+    const barHeight = 4;
+    const barY = screenY - (sprite ? sprite.height / 2 : 20) - 10;
+
+    ctx.save();
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(screenX - barWidth / 2, barY, barWidth, barHeight);
+
+    const hpRatio = health.current / health.max;
+    ctx.fillStyle = '#00ff00';
+    ctx.fillRect(screenX - barWidth / 2, barY, barWidth * hpRatio, barHeight);
+    ctx.restore();
+  }
+
+  /**
+   * 攻撃線を描画
+   */
+  renderAttackLine(bit, world) {
+    const attackLine = bit.getTrait('AttackLine');
+    if (!attackLine) return;
+
+    const pos = bit.getTrait('Position');
+    if (!pos) return;
+
+    // ターゲットを取得
+    const targetBit = world.getBit(attackLine.targetId);
+    if (!targetBit) return;
+
+    const targetPos = targetBit.getTrait('Position');
+    if (!targetPos) return;
+
+    const ctx = this.ctx;
+
+    // カメラオフセット適用(layer 0のみ)
+    const offsetX = pos.layer === 0 ? -this.camera.x : 0;
+    const offsetY = pos.layer === 0 ? -this.camera.y : 0;
+
+    const startX = pos.x + offsetX;
+    const startY = pos.y + offsetY;
+    const endX = targetPos.x + offsetX;
+    const endY = targetPos.y + offsetY;
+
+    // 残り時間に応じて透明度を変更
+    const alpha = attackLine.getRemainingRatio();
+
+    ctx.save();
+    ctx.strokeStyle = attackLine.color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = attackLine.lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    ctx.restore();
   }
 
   /**
