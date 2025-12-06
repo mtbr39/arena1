@@ -19,6 +19,7 @@ import { DestroyAction } from './actions/DestroyAction.js';
 import { createPlayerBit } from './entities/PlayerBit.js';
 import { createEnemyBit, createEnemyRangedBit } from './entities/EnemyBit.js';
 import { createAllyMeleeBit, createAllyRangedBit } from './entities/AllyBit.js';
+import { createBossEnemyBit, createTowerAllyBit } from './entities/BossBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
 import { createSkillButtonBit } from './entities/SkillButtonBit.js';
 
@@ -67,6 +68,14 @@ class Game {
     // プレイヤーを作成
     const player = createPlayerBit(this.world, 400, 300);
     this.world.addBit(player);
+
+    // ボス敵を配置(画面上部中央、動かない)
+    const boss = createBossEnemyBit(this.world, 400, 100);
+    this.world.addBit(boss);
+
+    // タワー味方を配置(画面下部中央、動かない)
+    const tower = createTowerAllyBit(this.world, 400, 500);
+    this.world.addBit(tower);
 
     // 敵を複数配置(近距離と遠距離)
     for (let i = 0; i < 3; i++) {
