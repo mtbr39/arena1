@@ -1,6 +1,8 @@
 import { System } from '../core/System.js';
 import { Action } from '../core/Action.js';
 import { createProjectileBit } from '../entities/ProjectileBit.js';
+import { createAreaAttackBit } from '../entities/AreaAttackBit.js';
+import { IndicatorType } from '../traits/SkillTargeting.js';
 
 /**
  * PlayerInputSystem - プレイヤーの入力を処理するゲーム固有ロジック
@@ -134,6 +136,28 @@ export class PlayerInputSystem extends System {
     if (!skillConfig) return;
     const config = skillConfig.getSkill(skillSlot);
 
+    // スキルタイプに応じて発動処理を分岐
+    if (config.indicatorType === IndicatorType.RANGE) {
+      this.castAreaSkill(player, config, targetPos);
+    } else {
+      this.castDirectionSkill(player, skillSlot, config, targetPos);
+    }
+
+    // クールダウン開始
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (skillTargeting) {
+      skillTargeting.startCooldown(skillSlot, config.cooldown);
+    }
+
+    console.log(`Skill ${skillSlot} (${config.name}) fired!`);
+  }
+
+  /**
+   * 方向指定スキル発動（弾を発射）
+   */
+  castDirectionSkill(player, skillSlot, config, targetPos) {
+    const playerPos = player.getTrait('Position');
+
     // 方向ベクトルを計算
     const dx = targetPos.x - playerPos.x;
     const dy = targetPos.y - playerPos.y;
@@ -163,14 +187,43 @@ export class PlayerInputSystem extends System {
     );
     projectile.ownerId = player.id;
     this.world.addBit(projectile);
+  }
 
-    // クールダウン開始
-    const skillTargeting = player.getTrait('SkillTargeting');
-    if (skillTargeting) {
-      skillTargeting.startCooldown(skillSlot, config.cooldown);
+  /**
+   * 範囲指定スキル発動（範囲攻撃を設置）
+   */
+  castAreaSkill(player, config, targetPos) {
+    const playerPos = player.getTrait('Position');
+
+    // プレイヤーからの距離を計算
+    const dx = targetPos.x - playerPos.x;
+    const dy = targetPos.y - playerPos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // castRange を超えないように位置を制限
+    let finalX = targetPos.x;
+    let finalY = targetPos.y;
+
+    if (distance > config.castRange) {
+      const ratio = config.castRange / distance;
+      finalX = playerPos.x + dx * ratio;
+      finalY = playerPos.y + dy * ratio;
     }
 
-    console.log(`Skill ${skillSlot} (${config.name}) fired!`);
+    // 範囲攻撃を生成
+    const areaAttack = createAreaAttackBit(
+      this.world,
+      finalX,
+      finalY,
+      {
+        color: config.color,
+        radius: config.areaRadius,
+        damage: config.damage,
+        skillType: 'R'
+      }
+    );
+    areaAttack.ownerId = player.id;
+    this.world.addBit(areaAttack);
   }
 
   /**
@@ -193,6 +246,8 @@ export class PlayerInputSystem extends System {
       this.startSkillTargeting(player, skillTargeting, skillConfig, 'W');
     } else if (this.inputManager.wasKeyPressed('e')) {
       this.startSkillTargeting(player, skillTargeting, skillConfig, 'E');
+    } else if (this.inputManager.wasKeyPressed('r')) {
+      this.startSkillTargeting(player, skillTargeting, skillConfig, 'R');
     }
   }
 
@@ -209,20 +264,34 @@ export class PlayerInputSystem extends System {
 
     const config = skillConfig.getSkill(skillSlot);
 
-    skillTargeting.startTargeting(
-      skillSlot,
-      config.indicatorType,
-      {
+    // スキルタイプに応じてインジケーター設定を変更
+    let indicatorConfig;
+    if (config.indicatorType === IndicatorType.RANGE) {
+      // 範囲スキル用の設定
+      indicatorConfig = {
+        color: config.color,
+        range: config.areaRadius,      // 範囲の広さをインジケーターに使用
+        castRange: config.castRange    // 範囲を置ける距離
+      };
+    } else {
+      // 方向スキル用の設定
+      indicatorConfig = {
         color: config.color,
         range: config.range,
         width: config.indicatorWidth
-      }
+      };
+    }
+
+    skillTargeting.startTargeting(
+      skillSlot,
+      config.indicatorType,
+      indicatorConfig
     );
 
     // 現在のマウス位置を即座に設定
     const { x, y } = this.inputManager.getMousePosition();
     skillTargeting.updateMousePosition(x, y);
 
-    console.log(`Skill ${skillSlot}: Click to target direction`);
+    console.log(`Skill ${skillSlot}: Click to target`);
   }
 }

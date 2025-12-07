@@ -9,6 +9,7 @@ import { ProjectileSystem } from './systems/ProjectileSystem.js';
 import { CombatAISystem } from './systems/CombatAISystem.js';
 import { SpawnSystem } from './systems/SpawnSystem.js';
 import { RepulsionSystem } from './systems/RepulsionSystem.js';
+import { AreaAttackSystem } from './systems/AreaAttackSystem.js';
 
 // Actions
 import { MoveAction } from './actions/MoveAction.js';
@@ -58,6 +59,7 @@ class Game {
     new RepulsionSystem(this.world);
     new CombatSystem(this.world);
     new ProjectileSystem(this.world);
+    new AreaAttackSystem(this.world);
 
     this.lastTime = 0;
     this.running = false;
@@ -166,8 +168,11 @@ class Game {
     const skillE = createSkillButtonBit(this.world, skillButtonStartX + 140, skillButtonY, 'E', 'Wind');
     this.world.addBit(skillE);
 
+    const skillR = createSkillButtonBit(this.world, skillButtonStartX + 210, skillButtonY, 'R', 'Meteor');
+    this.world.addBit(skillR);
+
     // スキルエディターを作成（スキルボタンの右側に配置）
-    const editorX = skillButtonStartX + 220;
+    const editorX = skillButtonStartX + 290;
     const editorY = skillButtonY;
     const editorBits = createSkillEditor(this.world, editorX, editorY);
     for (const bit of editorBits) {
@@ -178,7 +183,7 @@ class Game {
     console.log('Controls:');
     console.log('- Click empty area: Move to that position');
     console.log('- Click enemy: Move close and attack');
-    console.log('- Q/W/E keys or skill buttons: Activate skill, then click to aim');
+    console.log('- Q/W/E/R keys or skill buttons: Activate skill, then click to aim');
   }
 
   /**
