@@ -8,6 +8,7 @@ import { InputReceiver } from '../traits/InputReceiver.js';
 import { MovementTarget } from '../traits/MovementTarget.js';
 import { AttackTarget } from '../traits/AttackTarget.js';
 import { SkillTargeting } from '../traits/SkillTargeting.js';
+import { SkillConfig } from '../traits/SkillConfig.js';
 
 /**
  * Player Bit - プレイヤーキャラクター
@@ -24,6 +25,7 @@ export function createPlayerBit(world, x, y) {
   bit.addTrait('MovementTarget', new MovementTarget(null, null, 0.5)); // 速度0.5
   bit.addTrait('AttackTarget', new AttackTarget(200, 1000, 20)); // 攻撃範囲50、クールダウン1秒、攻撃力20
   bit.addTrait('SkillTargeting', new SkillTargeting());
+  bit.addTrait('SkillConfig', new SkillConfig());
 
   return bit;
 }

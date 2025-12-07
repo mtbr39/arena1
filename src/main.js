@@ -23,6 +23,7 @@ import { createAllyMeleeBit, createAllyRangedBit } from './entities/AllyBit.js';
 import { createBossEnemyBit, createTowerAllyBit } from './entities/BossBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
 import { createSkillButtonBit } from './entities/SkillButtonBit.js';
+import { createSkillEditor } from './entities/SkillEditorBit.js';
 
 /**
  * ゲームのメインクラス
@@ -164,6 +165,14 @@ class Game {
 
     const skillE = createSkillButtonBit(this.world, skillButtonStartX + 140, skillButtonY, 'E', 'Wind');
     this.world.addBit(skillE);
+
+    // スキルエディターを作成（スキルボタンの右側に配置）
+    const editorX = skillButtonStartX + 220;
+    const editorY = skillButtonY;
+    const editorBits = createSkillEditor(this.world, editorX, editorY);
+    for (const bit of editorBits) {
+      this.world.addBit(bit);
+    }
 
     console.log('Game initialized!');
     console.log('Controls:');

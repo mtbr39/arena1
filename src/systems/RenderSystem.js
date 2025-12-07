@@ -138,8 +138,8 @@ export class RenderSystem extends System {
     // UIFrame描画
     if (uiFrame && uiFrame.visible) {
       ctx.save();
-      ctx.fillStyle = 'rgba(50, 50, 70, 0.9)';
-      ctx.strokeStyle = '#aaaaaa';
+      ctx.fillStyle = uiFrame.backgroundColor || 'rgba(50, 50, 70, 0.9)';
+      ctx.strokeStyle = uiFrame.borderColor || '#aaaaaa';
       ctx.lineWidth = 2;
 
       const x = screenX - uiFrame.width / 2;

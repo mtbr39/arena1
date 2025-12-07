@@ -1,29 +1,6 @@
 import { System } from '../core/System.js';
 import { Action } from '../core/Action.js';
 import { createProjectileBit } from '../entities/ProjectileBit.js';
-import { IndicatorType } from '../traits/SkillTargeting.js';
-
-// スキルごとの設定
-const SKILL_CONFIG = {
-  Q: {
-    color: '#ff6600', size: 14, speed: 1, damage: 25, range: 200, name: 'Fire',
-    indicatorType: IndicatorType.DIRECTION,
-    indicatorWidth: 16,
-    cooldown: 3000  // 3秒
-  },
-  W: {
-    color: '#66ccff', size: 16, speed: 0.5, damage: 30, range: 350, name: 'Ice',
-    indicatorType: IndicatorType.DIRECTION,
-    indicatorWidth: 20,
-    cooldown: 5000  // 5秒
-  },
-  E: {
-    color: '#99ff66', size: 10, speed: 2, damage: 15, range: 100, name: 'Wind',
-    indicatorType: IndicatorType.DIRECTION,
-    indicatorWidth: 12,
-    cooldown: 2000  // 2秒
-  }
-};
 
 /**
  * PlayerInputSystem - プレイヤーの入力を処理するゲーム固有ロジック
@@ -152,6 +129,11 @@ export class PlayerInputSystem extends System {
     const playerPos = player.getTrait('Position');
     if (!playerPos) return;
 
+    // スキル設定を取得
+    const skillConfig = player.getTrait('SkillConfig');
+    if (!skillConfig) return;
+    const config = skillConfig.getSkill(skillSlot);
+
     // 方向ベクトルを計算
     const dx = targetPos.x - playerPos.x;
     const dy = targetPos.y - playerPos.y;
@@ -162,9 +144,6 @@ export class PlayerInputSystem extends System {
     // 正規化
     const dirX = dx / distance;
     const dirY = dy / distance;
-
-    // スキル設定を取得
-    const config = SKILL_CONFIG[skillSlot] || SKILL_CONFIG.Q;
 
     // 弾を生成
     const projectile = createProjectileBit(
@@ -204,20 +183,23 @@ export class PlayerInputSystem extends System {
     const skillTargeting = player.getTrait('SkillTargeting');
     if (!skillTargeting) return;
 
+    const skillConfig = player.getTrait('SkillConfig');
+    if (!skillConfig) return;
+
     // スキルキーの処理(wasKeyPressed を使ってフレーム単位で検知)
     if (this.inputManager.wasKeyPressed('q')) {
-      this.startSkillTargeting(skillTargeting, 'Q');
+      this.startSkillTargeting(player, skillTargeting, skillConfig, 'Q');
     } else if (this.inputManager.wasKeyPressed('w')) {
-      this.startSkillTargeting(skillTargeting, 'W');
+      this.startSkillTargeting(player, skillTargeting, skillConfig, 'W');
     } else if (this.inputManager.wasKeyPressed('e')) {
-      this.startSkillTargeting(skillTargeting, 'E');
+      this.startSkillTargeting(player, skillTargeting, skillConfig, 'E');
     }
   }
 
   /**
    * スキルターゲティングを開始（インジケーター設定付き）
    */
-  startSkillTargeting(skillTargeting, skillSlot) {
+  startSkillTargeting(player, skillTargeting, skillConfig, skillSlot) {
     // クールダウン中は開始できない
     if (skillTargeting.isOnCooldown(skillSlot)) {
       const remaining = Math.ceil(skillTargeting.getCooldownRemaining(skillSlot) / 1000);
@@ -225,7 +207,7 @@ export class PlayerInputSystem extends System {
       return;
     }
 
-    const config = SKILL_CONFIG[skillSlot] || SKILL_CONFIG.Q;
+    const config = skillConfig.getSkill(skillSlot);
 
     skillTargeting.startTargeting(
       skillSlot,
