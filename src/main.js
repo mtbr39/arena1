@@ -7,7 +7,7 @@ import { MovementSystem } from './systems/MovementSystem.js';
 import { CombatSystem } from './systems/CombatSystem.js';
 import { ProjectileSystem } from './systems/ProjectileSystem.js';
 import { CombatAISystem } from './systems/CombatAISystem.js';
-import { SpawnSystem } from './systems/SpawnSystem.js';
+import { SpawnerSystem } from './systems/SpawnerSystem.js';
 import { RepulsionSystem } from './systems/RepulsionSystem.js';
 import { AreaAttackSystem } from './systems/AreaAttackSystem.js';
 
@@ -24,6 +24,7 @@ import { createBossEnemyBit, createTowerAllyBit } from './entities/BossBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
 import { createSkillButtonBit } from './entities/SkillButtonBit.js';
 import { createSkillEditor } from './entities/SkillEditorBit.js';
+import { createTowerWorldSpawner, createBossWorldSpawner } from './entities/WorldSpawnerBit.js';
 
 /**
  * ゲームのメインクラス
@@ -43,16 +44,7 @@ class Game {
     // System の登録(登録順 = 実行順)
     // 注: コンストラクタで自動的に world.systemManager に登録される
     new PlayerInputSystem(this.world, this.inputManager, this.renderSystem);
-    new SpawnSystem(this.world, {
-      enemySpawnInterval: 8000, // 8秒ごとに敵をスポーン
-      allySpawnInterval: 10000, // 10秒ごとに味方をスポーン
-      enemySpawnCount: 3, // 一度に3匹の敵をスポーン
-      allySpawnCount: 2, // 一度に2匹の味方をスポーン
-      enemyFactories: [createEnemyBit, createEnemyRangedBit],
-      allyFactories: [createAllyMeleeBit, createAllyRangedBit],
-      enemySpawnArea: { minX: 100, maxX: 700, minY: -400, maxY: -200 },
-      allySpawnArea: { minX: 200, maxX: 600, minY: 800, maxY: 1000 }
-    });
+    new SpawnerSystem(this.world); // Spawner Traitを持つBitを処理
     new CombatAISystem(this.world);
     new MovementSystem(this.world);
     new RepulsionSystem(this.world);
@@ -87,6 +79,14 @@ class Game {
     // タワー味方を配置(画面下部中央、動かない)
     const tower = createTowerAllyBit(this.world, 400, 700);
     this.world.addBit(tower);
+
+    // World Spawner を配置 - タワーを定期的にスポーン
+    const towerSpawner = createTowerWorldSpawner(this.world, createTowerAllyBit);
+    this.world.addBit(towerSpawner);
+
+    // World Spawner を配置 - ボスを定期的にスポーン
+    const bossSpawner = createBossWorldSpawner(this.world, createBossEnemyBit);
+    this.world.addBit(bossSpawner);
 
     // 敵を複数配置(近距離と遠距離)
     for (let i = 0; i < 3; i++) {

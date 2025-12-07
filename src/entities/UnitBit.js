@@ -29,15 +29,6 @@ const UNIT_CONFIGS = {
     attackCooldown: 2000,
     attackPower: 3,
     tags: ['ranged']
-  },
-  minion: {
-    hp: 30,
-    size: 20,
-    speed: 0.5,
-    attackRange: 40,
-    attackCooldown: 1800,
-    attackPower: 2,
-    tags: ['minion']
   }
 };
 
@@ -49,14 +40,12 @@ const TEAM_CONFIGS = {
     tag: 'enemy',
     colorMelee: '#ff4444',
     colorRanged: '#ff8844',
-    colorMinion: '#ff6666',
     speedMultiplier: 0.75 // 敵は遅く
   },
   ally: {
     tag: 'ally',
     colorMelee: '#44ff88',
     colorRanged: '#88ddff',
-    colorMinion: '#66ff66',
     speedMultiplier: 1.0
   }
 };
@@ -105,10 +94,6 @@ export function createEnemyRangedBit(world, x, y) {
   return createUnitBit(world, x, y, 'ranged', 'enemy');
 }
 
-export function createEnemyMinionBit(world, x, y) {
-  return createUnitBit(world, x, y, 'minion', 'enemy');
-}
-
 // Ally exports
 export function createAllyMeleeBit(world, x, y) {
   return createUnitBit(world, x, y, 'melee', 'ally');
@@ -116,8 +101,4 @@ export function createAllyMeleeBit(world, x, y) {
 
 export function createAllyRangedBit(world, x, y) {
   return createUnitBit(world, x, y, 'ranged', 'ally');
-}
-
-export function createAllyMinionBit(world, x, y) {
-  return createUnitBit(world, x, y, 'minion', 'ally');
 }
