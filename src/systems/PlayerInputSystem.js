@@ -1,12 +1,28 @@
 import { System } from '../core/System.js';
 import { Action } from '../core/Action.js';
 import { createProjectileBit } from '../entities/ProjectileBit.js';
+import { IndicatorType } from '../traits/SkillTargeting.js';
 
 // スキルごとの設定
 const SKILL_CONFIG = {
-  Q: { color: '#ff6600', size: 14, speed: 8, damage: 25, range: 400, name: 'Fire' },
-  W: { color: '#66ccff', size: 16, speed: 6, damage: 30, range: 350, name: 'Ice' },
-  E: { color: '#99ff66', size: 10, speed: 12, damage: 15, range: 500, name: 'Wind' }
+  Q: {
+    color: '#ff6600', size: 14, speed: 1, damage: 25, range: 200, name: 'Fire',
+    indicatorType: IndicatorType.DIRECTION,
+    indicatorWidth: 16,
+    cooldown: 3000  // 3秒
+  },
+  W: {
+    color: '#66ccff', size: 16, speed: 0.5, damage: 30, range: 350, name: 'Ice',
+    indicatorType: IndicatorType.DIRECTION,
+    indicatorWidth: 20,
+    cooldown: 5000  // 5秒
+  },
+  E: {
+    color: '#99ff66', size: 10, speed: 2, damage: 15, range: 100, name: 'Wind',
+    indicatorType: IndicatorType.DIRECTION,
+    indicatorWidth: 12,
+    cooldown: 2000  // 2秒
+  }
 };
 
 /**
@@ -20,9 +36,37 @@ export class PlayerInputSystem extends System {
   }
 
   update(deltaTime) {
+    this.updateCooldowns(deltaTime);
     this.updateSkillInput();
-    this.updatePlayerMovement();
+    this.updateSkillTargetingMouse();
     this.updateClickInput();
+  }
+
+  /**
+   * クールダウンを更新
+   */
+  updateCooldowns(deltaTime) {
+    const player = this.world.queryBits(bit => bit.hasTag('player'))[0];
+    if (!player) return;
+
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (skillTargeting) {
+      skillTargeting.updateCooldowns(deltaTime);
+    }
+  }
+
+  /**
+   * スキルターゲティング中のマウス位置を更新
+   */
+  updateSkillTargetingMouse() {
+    const player = this.world.queryBits(bit => bit.hasTag('player'))[0];
+    if (!player) return;
+
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (!skillTargeting || !skillTargeting.isTargeting) return;
+
+    const { x, y } = this.inputManager.getMousePosition();
+    skillTargeting.updateMousePosition(x, y);
   }
 
   /**
@@ -141,48 +185,13 @@ export class PlayerInputSystem extends System {
     projectile.ownerId = player.id;
     this.world.addBit(projectile);
 
-    console.log(`Skill ${skillSlot} (${config.name}) fired!`);
-  }
-
-  /**
-   * キーボード入力でプレイヤーを移動
-   */
-  updatePlayerMovement() {
-    const player = this.world.queryBits(bit => bit.hasTag('player'))[0];
-    if (!player) return;
-
-    const speed = 3;
-    let dx = 0;
-    let dy = 0;
-
-    if (this.inputManager.isKeyDown('w') || this.inputManager.isKeyDown('arrowup')) dy -= speed;
-    if (this.inputManager.isKeyDown('s') || this.inputManager.isKeyDown('arrowdown')) dy += speed;
-    if (this.inputManager.isKeyDown('a') || this.inputManager.isKeyDown('arrowleft')) dx -= speed;
-    if (this.inputManager.isKeyDown('d') || this.inputManager.isKeyDown('arrowright')) dx += speed;
-
-    if (dx !== 0 || dy !== 0) {
-      // キーボード移動中はクリック移動をキャンセル
-      const movementTarget = player.getTrait('MovementTarget');
-      if (movementTarget) {
-        movementTarget.clear();
-      }
-
-      // キーボード移動中は攻撃対象もキャンセル
-      const attackTarget = player.getTrait('AttackTarget');
-      if (attackTarget) {
-        attackTarget.clear();
-      }
-
-      const action = new Action(
-        `move_${Date.now()}`,
-        'Move',
-        player.id,
-        [],
-        { dx, dy }
-      );
-
-      this.world.enqueueAction(action);
+    // クールダウン開始
+    const skillTargeting = player.getTrait('SkillTargeting');
+    if (skillTargeting) {
+      skillTargeting.startCooldown(skillSlot, config.cooldown);
     }
+
+    console.log(`Skill ${skillSlot} (${config.name}) fired!`);
   }
 
   /**
@@ -197,14 +206,41 @@ export class PlayerInputSystem extends System {
 
     // スキルキーの処理(wasKeyPressed を使ってフレーム単位で検知)
     if (this.inputManager.wasKeyPressed('q')) {
-      skillTargeting.startTargeting('Q');
-      console.log('Skill Q: Click to target direction');
+      this.startSkillTargeting(skillTargeting, 'Q');
     } else if (this.inputManager.wasKeyPressed('w')) {
-      skillTargeting.startTargeting('W');
-      console.log('Skill W: Click to target direction');
+      this.startSkillTargeting(skillTargeting, 'W');
     } else if (this.inputManager.wasKeyPressed('e')) {
-      skillTargeting.startTargeting('E');
-      console.log('Skill E: Click to target direction');
+      this.startSkillTargeting(skillTargeting, 'E');
     }
+  }
+
+  /**
+   * スキルターゲティングを開始（インジケーター設定付き）
+   */
+  startSkillTargeting(skillTargeting, skillSlot) {
+    // クールダウン中は開始できない
+    if (skillTargeting.isOnCooldown(skillSlot)) {
+      const remaining = Math.ceil(skillTargeting.getCooldownRemaining(skillSlot) / 1000);
+      console.log(`Skill ${skillSlot} is on cooldown (${remaining}s)`);
+      return;
+    }
+
+    const config = SKILL_CONFIG[skillSlot] || SKILL_CONFIG.Q;
+
+    skillTargeting.startTargeting(
+      skillSlot,
+      config.indicatorType,
+      {
+        color: config.color,
+        range: config.range,
+        width: config.indicatorWidth
+      }
+    );
+
+    // 現在のマウス位置を即座に設定
+    const { x, y } = this.inputManager.getMousePosition();
+    skillTargeting.updateMousePosition(x, y);
+
+    console.log(`Skill ${skillSlot}: Click to target direction`);
   }
 }
