@@ -32,16 +32,16 @@ export function createSkillEditorToggleBit(world, x, y) {
       if (uiFrame) uiFrame.visible = !uiFrame.visible;
     }
 
-    // コントロールの表示/非表示をトグル
-    const editorControls = world.queryBits(b => b.hasTag('skill-editor-control'));
-    for (const control of editorControls) {
-      const uiFrame = control.getTrait('UIFrame');
-      if (uiFrame) uiFrame.visible = !uiFrame.visible;
-    }
-
-    // 表示された場合、初期化
     if (!isCurrentlyVisible) {
+      // 表示する場合: selectSkillTabで適切に表示を制御
       selectSkillTab(world, 'Q');
+    } else {
+      // 非表示にする場合: すべてのコントロールを非表示
+      const editorControls = world.queryBits(b => b.hasTag('skill-editor-control'));
+      for (const control of editorControls) {
+        const uiFrame = control.getTrait('UIFrame');
+        if (uiFrame) uiFrame.visible = false;
+      }
     }
   });
 
@@ -259,13 +259,21 @@ function getActiveSkillSlot(world) {
  * スキルタブを選択
  */
 function selectSkillTab(world, skillSlot) {
-  // タブの選択状態を更新
+  // タブを表示して選択状態を更新
   const allTabs = world.queryBits(b => b.hasTag('skill-tab'));
   for (const tab of allTabs) {
     const tabUiFrame = tab.getTrait('UIFrame');
     if (tabUiFrame) {
+      tabUiFrame.visible = true;
       tabUiFrame.backgroundColor = tab.skillSlot === skillSlot ? '#555588' : '#333344';
     }
+  }
+
+  // タイプトグルボタンを表示
+  const typeToggle = world.queryBits(b => b.hasTag('skill-type-toggle'));
+  for (const toggle of typeToggle) {
+    const uiFrame = toggle.getTrait('UIFrame');
+    if (uiFrame) uiFrame.visible = true;
   }
 
   // スキルタイプラベルを更新

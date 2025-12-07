@@ -19,8 +19,7 @@ import { DestroyAction } from './actions/DestroyAction.js';
 
 // Entities
 import { createPlayerBit } from './entities/PlayerBit.js';
-import { createEnemyBit, createEnemyRangedBit } from './entities/EnemyBit.js';
-import { createAllyMeleeBit, createAllyRangedBit } from './entities/AllyBit.js';
+import { createEnemyBit, createEnemyRangedBit, createAllyMeleeBit, createAllyRangedBit } from './entities/UnitBit.js';
 import { createBossEnemyBit, createTowerAllyBit } from './entities/BossBit.js';
 import { createUIButtonBit } from './entities/UIButtonBit.js';
 import { createSkillButtonBit } from './entities/SkillButtonBit.js';
