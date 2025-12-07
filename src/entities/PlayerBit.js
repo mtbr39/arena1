@@ -18,8 +18,8 @@ export function createPlayerBit(world, x, y) {
 
   bit.addTrait('Position', new Position(x, y, 0, 0));
   bit.addTrait('Health', new Health(800));
-  bit.addTrait('Sprite', new Sprite('#4a9eff', 64, 64, 'rect'));
-  bit.addTrait('Collider', new Collider('Circle', { radius: 16 }));
+  bit.addTrait('Sprite', new Sprite('#4a9eff', 64, 64, 'circle'));
+  bit.addTrait('Collider', new Collider('Circle', { radius: 32 }));
   bit.addTrait('TagSet', new TagSet(['creature', 'player']));
   bit.addTrait('InputReceiver', new InputReceiver(true, true, true));
   bit.addTrait('MovementTarget', new MovementTarget(null, null, 0.5)); // 速度0.5

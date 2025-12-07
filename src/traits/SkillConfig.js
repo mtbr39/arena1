@@ -9,7 +9,7 @@ export const DEFAULT_SKILL_CONFIG = {
     name: 'Fire',
     color: '#ff6600',
     // 方向スキル用パラメータ
-    size: 14,           // 弾の大きさ
+    size: 32,           // 弾の大きさ
     speed: 1,           // 弾の速度
     damage: 25,         // ダメージ
     range: 200,         // 射程（方向スキル: 弾の飛距離）
@@ -24,8 +24,8 @@ export const DEFAULT_SKILL_CONFIG = {
   W: {
     name: 'Ice',
     color: '#66ccff',
-    size: 16,
-    speed: 0.5,
+    size: 80,
+    speed: 0.7,
     damage: 30,
     range: 350,
     indicatorWidth: 20,
@@ -37,14 +37,14 @@ export const DEFAULT_SKILL_CONFIG = {
   E: {
     name: 'Wind',
     color: '#99ff66',
-    size: 10,
+    size: 20,
     speed: 2,
     damage: 15,
-    range: 100,
+    range: 200,
     indicatorWidth: 12,
     areaRadius: 40,
     castRange: 150,
-    cooldown: 2000,
+    cooldown: 800,
     indicatorType: IndicatorType.DIRECTION
   },
   R: {

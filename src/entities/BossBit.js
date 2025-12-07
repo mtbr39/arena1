@@ -15,8 +15,8 @@ function createTowerBit(world, x, y, name, description, color, teamTag, hp, atta
 
   bit.addTrait('Position', new Position(x, y, 0, 0));
   bit.addTrait('Health', new Health(hp));
-  bit.addTrait('Sprite', new Sprite(color, 128, 128, 'rect'));
-  bit.addTrait('Collider', new Collider('Circle', { radius: 32 }));
+  bit.addTrait('Sprite', new Sprite(color, 64, 64, 'rect'));
+  bit.addTrait('Collider', new Collider('Rect', { width: 64, height: 64 }));
   bit.addTrait('TagSet', new TagSet(['creature', teamTag, 'stationary']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   // MovementTargetは追加しない(動けないように)

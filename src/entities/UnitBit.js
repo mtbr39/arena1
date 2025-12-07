@@ -16,7 +16,7 @@ const UNIT_CONFIGS = {
     hp: 60,
     size: 50,
     speed: 0.4,
-    attackRange: 50,
+    attackRange: 80,
     attackCooldown: 1500,
     attackPower: 4,
     tags: []
@@ -82,7 +82,7 @@ function createUnitBit(world, x, y, unitType, teamType) {
 
   bit.addTrait('Position', new Position(x, y, 0, 0));
   bit.addTrait('Health', new Health(unitConfig.hp));
-  bit.addTrait('Sprite', new Sprite(color, unitConfig.size, unitConfig.size, 'rect'));
+  bit.addTrait('Sprite', new Sprite(color, unitConfig.size, unitConfig.size, 'circle'));
   bit.addTrait('Collider', new Collider('Circle', { radius: unitConfig.size / 2 }));
   bit.addTrait('TagSet', new TagSet(['creature', teamConfig.tag, ...unitConfig.tags]));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
