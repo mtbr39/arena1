@@ -63,6 +63,10 @@ export class World {
 
       if (pos.layer !== layer) return false;
 
+      // UIFrameがある場合、visibleをチェック
+      const uiFrame = bit.getTrait('UIFrame');
+      if (uiFrame && !uiFrame.visible) return false;
+
       if (!collider) {
         // コライダーがない場合は点で判定
         return Math.abs(pos.x - x) < 5 && Math.abs(pos.y - y) < 5;

@@ -151,15 +151,18 @@ export class RenderSystem extends System {
       ctx.restore();
     }
 
-    // Label描画
+    // Label描画（UIFrameがある場合はvisibleもチェック）
     if (label) {
-      ctx.save();
-      ctx.fillStyle = label.color;
-      ctx.font = `${label.fontSize}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label.text, screenX, screenY);
-      ctx.restore();
+      const shouldRenderLabel = !uiFrame || uiFrame.visible;
+      if (shouldRenderLabel) {
+        ctx.save();
+        ctx.fillStyle = label.color;
+        ctx.font = `${label.fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label.text, screenX, screenY);
+        ctx.restore();
+      }
     }
 
     // HPバーはincludeHealthBarがtrueの場合のみ描画

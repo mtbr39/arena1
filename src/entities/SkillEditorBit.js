@@ -178,12 +178,6 @@ export function createParamLabelBit(world, x, y, paramKey, skillType) {
   const uiFrame = bit.getTrait('UIFrame');
   uiFrame.visible = false;
 
-  // Labelも初期状態で非表示
-  const label = bit.getTrait('Label');
-  if (label) {
-    label.visible = false;
-  }
-
   return bit;
 }
 
@@ -325,31 +319,21 @@ function updateParamVisibility(world, skillSlot) {
   const editorPanels = world.queryBits(b => b.hasTag('skill-editor-panel'));
   const isEditorVisible = editorPanels.length > 0 && editorPanels[0].getTrait('UIFrame')?.visible;
 
-  // 方向スキル用パラメータ
+  // 方向スキル用パラメータ（行、ラベル、ボタンすべて）
   const directionParams = world.queryBits(b => b.hasTag('param-direction'));
   for (const param of directionParams) {
     const uiFrame = param.getTrait('UIFrame');
     if (uiFrame) {
       uiFrame.visible = isEditorVisible && !isArea;
     }
-    // Labelも制御
-    const label = param.getTrait('Label');
-    if (label) {
-      label.visible = isEditorVisible && !isArea;
-    }
   }
 
-  // 範囲スキル用パラメータ
+  // 範囲スキル用パラメータ（行、ラベル、ボタンすべて）
   const areaParams = world.queryBits(b => b.hasTag('param-area'));
   for (const param of areaParams) {
     const uiFrame = param.getTrait('UIFrame');
     if (uiFrame) {
       uiFrame.visible = isEditorVisible && isArea;
-    }
-    // Labelも制御
-    const label = param.getTrait('Label');
-    if (label) {
-      label.visible = isEditorVisible && isArea;
     }
   }
 
@@ -370,29 +354,19 @@ function updateAllParamLabels(world, skillSlot) {
   const skill = skillConfig.getSkill(skillSlot);
   const isArea = skillConfig.isAreaSkill(skillSlot);
 
-  // エディターが表示中かチェック
-  const editorPanels = world.queryBits(b => b.hasTag('skill-editor-panel'));
-  const isEditorVisible = editorPanels.length > 0 && editorPanels[0].getTrait('UIFrame')?.visible;
-
   const paramLabels = world.queryBits(b => b.hasTag('skill-param-label'));
   for (const labelBit of paramLabels) {
     const paramKey = labelBit.paramKey;
     const skillType = labelBit.skillType;
 
-    const label = labelBit.getTrait('Label');
-    if (!label) continue;
-
-    // 現在のスキルタイプに合わないラベルは非表示
-    if ((skillType === 'area') !== isArea) {
-      label.visible = false;
-      continue;
-    }
+    // 現在のスキルタイプに合わないラベルはスキップ
+    if ((skillType === 'area') !== isArea) continue;
 
     const paramConfig = skillType === 'area' ? AREA_SKILL_PARAM_RANGES[paramKey] : SKILL_PARAM_RANGES[paramKey];
     if (!paramConfig) continue;
 
-    // エディターが表示中の場合のみテキストを更新して表示
-    if (isEditorVisible) {
+    const label = labelBit.getTrait('Label');
+    if (label) {
       const value = skill[paramKey] || 0;
       let displayValue;
       if (paramKey === 'cooldown') {
@@ -403,9 +377,6 @@ function updateAllParamLabels(world, skillSlot) {
         displayValue = value;
       }
       label.text = `${paramConfig.label}: ${displayValue}`;
-      label.visible = true;
-    } else {
-      label.visible = false;
     }
   }
 }
