@@ -22,7 +22,7 @@ function createTowerBit(world, x, y, name, description, color, teamTag, hp, atta
   bit.addTrait('TagSet', new TagSet(['creature', teamTag, 'stationary']));
   bit.addTrait('InputReceiver', new InputReceiver(true, false, false));
   // MovementTargetは追加しない(動けないように)
-  bit.addTrait('AttackTarget', new AttackTarget(300, 1000, attack));
+  bit.addTrait('AttackTarget', new AttackTarget(300, 400, attack));
 
   // Spawner Traitを追加 - 10秒ごとに3体をスポーン
   if (spawnFactories && spawnFactories.length > 0) {
@@ -49,7 +49,7 @@ function createTowerBit(world, x, y, name, description, color, teamTag, hp, atta
  * Spawner Traitを持ち、定期的に敵ユニット(meleeとranged)を召喚する
  */
 export function createBossEnemyBit(world, x, y) {
-  return createTowerBit(world, x, y, 'Boss', 'A powerful stationary boss', '#ff0000', 'enemy', 300, 20, [createEnemyBit, createEnemyRangedBit]);
+  return createTowerBit(world, x, y, 'Boss', 'A powerful stationary boss', '#ff0000', 'enemy', 300, 30, [createEnemyBit, createEnemyRangedBit]);
 }
 
 /**
@@ -57,5 +57,5 @@ export function createBossEnemyBit(world, x, y) {
  * Spawner Traitを持ち、定期的に味方ユニット(meleeとranged)を生産する
  */
 export function createTowerAllyBit(world, x, y) {
-  return createTowerBit(world, x, y, 'Tower', 'A powerful stationary tower', '#00ff00', 'ally', 300, 20, [createAllyMeleeBit, createAllyRangedBit]);
+  return createTowerBit(world, x, y, 'Tower', 'A powerful stationary tower', '#00ff00', 'ally', 300, 30, [createAllyMeleeBit, createAllyRangedBit]);
 }
